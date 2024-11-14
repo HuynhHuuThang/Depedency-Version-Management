@@ -1,0 +1,38 @@
+<!-- <link rel="stylesheet" href="assets/libs/css/style.css">
+<input class="c-checkbox" type="checkbox" id="checkbox">
+<div class="c-formContainer">
+  <form class="c-form" action="">
+    <input class="c-form__input" placeholder="E-mail" type="email" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$" required>
+    <label class="c-form__buttonLabel" for="checkbox">
+      <button class="c-form__button" type="button">Send</button>
+    </label>
+    <label class="c-form__toggle" for="checkbox" data-title="Notify me"></label>
+  </form>
+</div> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Python Script</title>
+</head>
+<body>
+    <button onclick="runPythonScript()">Run CLI.py</button>
+
+    <div id="output"></div>
+
+    <script>
+        async function runPythonScript() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/run-cli', { method: 'POST' });
+                const result = await response.json();
+                
+                // Display the result
+                document.getElementById('output').textContent = result.output || result.error;
+            } catch (error) {
+                document.getElementById('output').textContent = "An error occurred: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
