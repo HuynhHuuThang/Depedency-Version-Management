@@ -58,3 +58,15 @@ async function insertData() {
 }
 
 insertData();
+
+
+// database table
+// id
+// bom-ref
+// score
+// severity
+// description
+// fix_version
+// recommendation
+// insights
+

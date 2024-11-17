@@ -1,0 +1,74 @@
+[project]
+name = "owasp-depscan"
+version = "5.4.8"
+description = "Fully open-source security audit for project dependencies based on known vulnerabilities and advisories."
+authors = [
+    {name = "Team AppThreat", email = "cloud@appthreat.com"},
+]
+dependencies = [
+    "appthreat-vulnerability-db==5.7.8",
+    "defusedxml",
+    "oras~=0.1.26",
+    "PyYAML",
+    "rich",
+    "quart",
+    "PyGithub",
+    "toml",
+    "pdfkit",
+    "Jinja2",
+    "packageurl-python",
+    "cvss",
+]
+
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/owasp-dep-scan/dep-scan"
+
+[project.scripts]
+depscan = "depscan.cli:main"
+scan = "depscan.cli:main"
+
+[project.optional-dependencies]
+dev = ["black",
+"flake8",
+"pytest",
+"pytest-cov",
+"httpretty"
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["depscan", "depscan.lib", "vendor"]
+
+[tool.pytest.ini_options]
+addopts = "--verbose --cov-append --cov-report term --cov depscan"
+
+[tool.flake8]
+ignore = "E203, E266, E501, W503, W605"
+max-line-length = 80
+max-complexity = 18
+select = "B,C,E,F,W,T4,B9"
+
+[tool.black]
+line-length = 80

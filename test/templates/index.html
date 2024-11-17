@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculator</title>
+</head>
+<body>
+    <form id="calculatorForm">
+        <input type="number" id="a" placeholder="Enter value for a" required>
+        <input type="number" id="b" placeholder="Enter value for b" required>
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('calculatorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const a = document.getElementById('a').value;
+            const b = document.getElementById('b').value;
+            
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ a, b })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('result').innerHTML = `Result: ${data.result}`;
+                } else {
+                    document.getElementById('result').innerHTML = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
