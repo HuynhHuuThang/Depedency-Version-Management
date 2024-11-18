@@ -41,6 +41,9 @@
 // }
 
 // scanDependencies();
+import pkg from 'pg';
+import { writeFileSync } from 'fs';
+const { Client } = pkg;
 
 async function scanDependencies() {
     try {
@@ -73,8 +76,7 @@ async function scanDependencies() {
 
         const data = await response.json();
         // Save to file
-        const fs = require('fs');
-        fs.writeFileSync('scan-results.json', JSON.stringify(data, null, 2));
+        writeFileSync('scan-results.json', JSON.stringify(data, null, 2));
         return data;
     } catch (error) {
         if (error.name === 'AbortError') { 
@@ -90,7 +92,7 @@ async function scanDependencies() {
 async function processVulnerabilityData(data) {
     // Array to store processed vulnerability records
     const vulnerabilityRecords = [];
-    console.log("Received data:", data);
+    // console.log("Received data:", data);
     
     // Check if data and vulnerabilities exist
     if (!data || !data.vulnerabilities) {
@@ -101,12 +103,18 @@ async function processVulnerabilityData(data) {
     for (const vuln of data.vulnerabilities) {
         try {
             // Get the vulnerability ID
+            // console.log("Vulnerability:", vuln);
             const vulnId = Array.isArray(vuln.id) ? vuln.id[0] : vuln.id;
-            console.log("Processing vulnerability:", vulnId);
+            // console.log("Processing vulnerability:", vulnId);
+
+            const bomRef = Array.isArray(vuln["bom-ref"]) ? vuln["bom-ref"][0] : vuln["bom-ref"];
+            const package_url = bomRef.split('/').slice(1).join('/') || '';
             
+
             // Get rating information with safe access
-            const ratings = Array.isArray(vuln.ratings) ? vuln.ratings : [];
+            const ratings = Array.isArray(vuln.ratings) ? vuln.ratings : vuln.ratings;
             const rating = ratings[0] || {};
+            // console.log("Rating:", rating);
             
             // Get affected version info with safe access
             const affects = Array.isArray(vuln.affects) ? vuln.affects : [];
@@ -117,9 +125,13 @@ async function processVulnerabilityData(data) {
             const properties = Array.isArray(vuln.properties) ? vuln.properties : [];
             const insightsProp = properties.find(p => p?.name === 'depscan:insights');
             const insights = insightsProp?.value || '';
+            // define affected and unaffected versions
+            const affectedVersions = versions.filter(v => v?.status === 'affected').map(v => v?.version || '');
+            const unaffectedVersions = versions.filter(v => v?.status === 'unaffected').map(v => v?.version || '');
             
             const record = {
                 vulnerability_id: vulnId || '',
+                package: package_url || '',
                 score: rating.score || null,
                 severity: rating.severity || null,
                 description: (vuln.description || '')
@@ -128,10 +140,12 @@ async function processVulnerabilityData(data) {
                     .trim(),
                 recommendation: vuln.recommendation || '',
                 affected_package: affect.ref || '',
-                affected_versions: versions.map(v => ({
-                    version: v?.version || '',
-                    status: v?.status || ''
-                })),
+                // affected_versions: versions.map(v => ({
+                //     version: v?.version || '',
+                //     status: v?.status || ''
+                // })),
+                affected_versions: affectedVersions,
+                unaffected_versions: unaffectedVersions,
                 insights: insights
             };
             
@@ -176,10 +190,95 @@ async function processVulnerabilityData(data) {
     return vulnerabilityRecords;
 }
 
+// async function insertData(vulnerabilityRecords) {
+//     // insert data into database
+//     try {
+//         for (const record of vulnerabilityRecords) {
+//             await db.query(`
+//                 INSERT INTO vulnerabilities (
+//                     vulnerability_id,
+//                     score,
+//                     severity,
+//                     description,
+//                     recommendation,
+//                     affected_package,
+//                     affected_versions,
+//                     insights
+//                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+//             `, [
+//                 record.vulnerability_id,
+//                 record.score,
+//                 record.severity,
+//                 record.description,
+//                 record.recommendation,
+//                 record.affected_package,
+//                 JSON.stringify(record.affected_versions), // Store versions as JSON
+//                 record.insights
+//             ]);
+//         }
+//         console.log(`Successfully processed ${vulnerabilityRecords.length} vulnerabilities`);
+//     } catch (error) {
+//         console.error('Error inserting vulnerability records:', error);
+//         throw error;
+//     }
+// }
+
+  
+  async function insertData(vulnerabilityRecords) {
+    const db = new Client({
+        user: 'postgres',
+        host: 'localhost',
+        database: 'postgres',
+        password: 'Admin@123456',
+        port: 5432,
+      });
+
+    try {
+      // Connect to PostgreSQL
+      await db.connect();
+      for (const record of vulnerabilityRecords) {
+        await db.query(`
+          INSERT INTO vulnerabilities (
+          id, 
+          purl,
+          version,
+          severity,
+          cvss_score, 
+          fix_version, 
+          short_description,
+          recommendation,
+          insights
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+        `, [
+            record.vulnerability_id,
+            record.package,
+            record.affected_versions,
+            record.severity,
+            record.score,
+            record.unaffected_versions,
+            record.description,
+            record.recommendation,
+            record.insights
+        ]);
+      }
+  
+      console.log("Data insertion complete!");
+    } catch (err) {
+      console.error("Error inserting data", err);
+    } finally {
+      // Close the connection
+      await db.end();
+    }
+}
+
+
 async function main() {
     const data = await scanDependencies();
-    console.log('Scan results:', JSON.stringify(data, null, 2));
-    await processVulnerabilityData(data);
+    // console.log('Scan results:', JSON.stringify(data, null, 2));
+    const vulnerabilityRecords = await  processVulnerabilityData(data);
+    // console.log("Vulnerability Records:", vulnerabilityRecords);
+    await insertData(vulnerabilityRecords);
 }
 
 main().catch(error => console.error('Main error:', error));

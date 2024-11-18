@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:859fe43e-6777-4890-b930-d7ee0d5a3a02",
+  "serialNumber": "urn:uuid:d7ce3d06-879b-4bf8-8bc6-39d09b8d8e79",
   "version": 1,
   "metadata": {
-    "timestamp": "2024-11-17T16:28:12Z",
+    "timestamp": "2024-11-18T14:47:12Z",
     "tools": {
       "components": [
         {
@@ -11440,6 +11440,63 @@
       ],
       "published": "2019-07-10T19:45:23",
       "updated": "2024-04-22T19:49:44"
+    },
+    {
+      "bom-ref": "CVE-2024-21538/pkg:npm/cross-spawn@7.0.3",
+      "id": "CVE-2024-21538",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21538"
+      },
+      "ratings": [
+        {
+          "score": 7.5,
+          "severity": "high",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "method": "CVSSv31"
+        }
+      ],
+      "cwes": [
+        1333
+      ],
+      "description": "# Regular Expression Denial of Service (ReDoS) in cross spawn\nVersions of the package cross spawn before 7.0.5 are vulnerable to Regular Expression Denial of Service (ReDoS) due to improper input sanitization. An attacker can increase the CPU usage and crash the program by crafting a very large and well crafted string.\nUpgrade to version 7.0.5 or later",
+      "recommendation": "Update to 7.0.5 or later",
+      "advisories": [],
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Dependency Tree: [\"pkg:npm/npm@10.9.0\", \"pkg:npm/cross-spawn@7.0.3\"]"
+      },
+      "affects": [
+        {
+          "ref": "pkg:npm/cross-spawn@7.0.3",
+          "versions": [
+            {
+              "version": "7.0.3",
+              "status": "affected"
+            },
+            {
+              "version": "7.0.5",
+              "status": "unaffected"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "depscan:insights",
+          "value": "Indirect dependency"
+        },
+        {
+          "name": "depscan:prioritized",
+          "value": "false"
+        },
+        {
+          "name": "affectedVersionRange",
+          "value": "cross-spawn@<7.0.5"
+        }
+      ],
+      "published": "2024-11-08T06:30:47",
+      "updated": "2024-11-15T22:25:54"
     },
     {
       "bom-ref": "MAL-2022-1443/pkg:npm/babimelpluginlodash@0.0.1-security.7",
