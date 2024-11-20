@@ -7,7 +7,7 @@ const db = new Client({
   user: 'postgres',
   host: 'localhost',
   database: 'postgres',
-  password: 'Admin@12345',
+  password: 'Admin@123456',
   port: 5432,
 });
 
@@ -138,7 +138,7 @@ async function insertData() {
     // Insert each JSON record into the table
     for (const record of vulnerabilityRecords) {
       await db.query(`
-        INSERT INTO vulnerabilities (
+        INSERT INTO vulnerabilities_test (
         id, 
         package_url,
         affected_version,

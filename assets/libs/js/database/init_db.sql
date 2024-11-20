@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS vulnerabilities (
+CREATE TABLE IF NOT EXISTS vulnerabilities_test (
     id VARCHAR(50) PRIMARY KEY,
     package_url VARCHAR,
     affected_version VARCHAR,
@@ -22,9 +22,9 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_vulnerabilities_updated_at
-    BEFORE UPDATE ON vulnerabilities
+    BEFORE UPDATE ON vulnerabilities_test
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-CREATE INDEX idx_scan_date ON vulnerabilities(scan_date);
-CREATE INDEX idx_severity ON vulnerabilities(severity);
+CREATE INDEX idx_scan_date ON vulnerabilities_test(scan_date);
+CREATE INDEX idx_severity ON vulnerabilities_test(severity);

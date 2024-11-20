@@ -2064,7 +2064,7 @@ Pageheader
     color: #71748d;
     background-color: #fff;
     width: 100%;
-    /*position: absolute; bottom: 0;*/
+    position: absolute; bottom: 0;
 }
 
 .footer-links {}
@@ -4102,11 +4102,18 @@ Pills vertical
 
 .dashboard-badges {}
 
-.badge-dot {
+/* .badge-dot {
     border-radius: 100%;
     padding: 4px;
     display: inline-block;
     margin-right: 3px;
+} */
+.badge-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
 }
 
 .label {
@@ -7009,9 +7016,9 @@ Media Query
             transform: scale(1);
   }
   
-  .c-checkbox:not(:checked) + .c-formContainer .c-form__input:required:valid ~ .c-form__toggle::before, .c-checkbox:checked + .c-formContainer .c-form__input:required:valid ~ .c-form__toggle::before {
+  /* .c-checkbox:not(:checked) + .c-formContainer .c-form__input:required:valid ~ .c-form__toggle::before, .c-checkbox:checked + .c-formContainer .c-form__input:required:valid ~ .c-form__toggle::before {
     content: 'Thank You! \1F60A';
-  }
+  } */
   
   .c-checkbox:not(:checked) + .c-formContainer .c-form__input:required:valid ~ .c-form__toggle {
     pointer-events: none;
@@ -7021,20 +7028,28 @@ Media Query
   .c-formContainer,
   .c-form,
   .c-form__toggle {
-    width: 20em;
-    height: 6.25em;
+    width: 10em;
+    height: 3em;
+
   }
   
   .c-formContainer {
     position: relative;
     font-weight: 700;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
   }
   
   .c-form,
   .c-form__toggle {
     position: absolute;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
     border-radius: 6.25em;
-    background-color: #ffffff;
+    background-color: white;
+    border: 1px solid #007bff;
     -webkit-transition: 0.2s;
     transition: 0.2s;
   }
@@ -7057,7 +7072,7 @@ Media Query
   }
   
   .c-form__toggle {
-    color: #ff7b73;
+    color: #000000;
     top: 0;
     cursor: pointer;
     z-index: 1;
@@ -7073,7 +7088,7 @@ Media Query
   }
   
   .c-form__toggle::before {
-    font-size: 1.75em;
+    font-size: 1.1em;
     content: attr(data-title);
   }
   
@@ -7082,14 +7097,14 @@ Media Query
     font: inherit;
     border: 0;
     outline: 0;
-    border-radius: 5em;
+    border-radius: 1em;
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
   }
   
   .c-form__input,
   .c-form__buttonLabel {
-    font-size: 1.75em;
+    font-size: 1em;
     opacity: 0;
     visibility: hidden;
     -webkit-transform: scale(0.7);
@@ -7099,7 +7114,7 @@ Media Query
   }
   
   .c-form__input {
-    color: #ffcccc;
+    color: #000000;
     height: 100%;
     width: 100%;
     padding: 0 0.714em;
@@ -7134,7 +7149,7 @@ Media Query
   }
   
   .c-form__buttonLabel {
-    color: #ffaea9;
+    color: #000000;
     height: 100%;
     width: auto;
   }
@@ -7153,8 +7168,46 @@ Media Query
     padding: 0;
     height: 100%;
     width: 5em;
-    background-color: #ff7b73;
+    background-color: #5969ff;
   }
+
+
+/* Loading spinner */
+.scan-status {
+    margin-top: 20px;
+    padding: 10px;
+    text-align: center;
+    background-color: #f0f8ff;
+    border-radius: 5px;
+}
+
+.scan-error {
+    margin-top: 10px;
+    padding: 10px;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    display: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 /*# sourceMappingURL=style.css.map */
 /* Dependency scanner page css */
 .dependency-scan-container {

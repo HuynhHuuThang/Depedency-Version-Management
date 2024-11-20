@@ -10,9 +10,9 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-var pool1 = new pg.Pool()
+// var pool = new pg.Pool()
 // Add connection test
-pool1.connect((err, client, release) => {
+pool.connect((err, client, release) => {
     if (err) {
         console.error('Error connecting to the database:', err.stack);
     } else {
