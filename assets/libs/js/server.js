@@ -40,7 +40,7 @@ pool.connect()
 app.get('/api/vulnerabilities/latest', async (req, res) => {
     try {
         const query = `
-            SELECT * FROM vulnerabilities_test 
+            SELECT * FROM vulnerabilities_test
             ORDER BY 
                 scan_date DESC,
                 CASE 
