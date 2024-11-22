@@ -1,0 +1,47 @@
+project_types = []
+    if find_python_reqfiles(src_dir) or find_files(src_dir, ".py", quick=True):
+        project_types.append("python")
+    if find_files(src_dir, "pom.xml", quick=True) or find_files(
+        src_dir, ".gradle", quick=True
+    ):
+        project_types.append("java")
+    if find_files(src_dir, ".gradle.kts", quick=True):
+        project_types.append("kotlin")
+    if find_files(src_dir, "build.sbt", quick=True):
+        project_types.append("scala")
+    if (
+        find_files(src_dir, "package.json", quick=True)
+        or find_files(src_dir, "yarn.lock", quick=True)
+        or find_files(src_dir, "rush.json", quick=True)
+    ):
+        project_types.append("nodejs")
+    if find_files(src_dir, "go.sum", quick=True) or find_files(
+        src_dir, "Gopkg.lock", quick=True
+    ):
+        project_types.append("go")
+    if find_files(src_dir, "Cargo.lock", quick=True):
+        project_types.append("rust")
+    if find_files(src_dir, "composer.json", quick=True):
+        project_types.append("php")
+    if find_files(src_dir, ".csproj", quick=True):
+        project_types.append("dotnet")
+    if find_files(src_dir, "Gemfile", quick=True) or find_files(
+        src_dir, "Gemfile.lock", quick=True
+    ):
+        project_types.append("ruby")
+    if find_files(src_dir, "deps.edn", quick=True) or find_files(
+        src_dir, "project.clj", quick=True
+    ):
+        project_types.append("clojure")
+    if find_files(src_dir, "conan.lock", quick=True) or find_files(
+        src_dir, "conanfile.txt", quick=True
+    ):
+        project_types.append("cpp")
+    if find_files(src_dir, "pubspec.lock", quick=True) or find_files(
+        src_dir, "pubspec.yaml", quick=True
+    ):
+        project_types.append("dart")
+    if find_files(src_dir, "cabal.project.freeze", quick=True):
+        project_types.append("haskell")
+    if find_files(src_dir, "mix.lock", quick=True):
+        project_types.append("elixir")

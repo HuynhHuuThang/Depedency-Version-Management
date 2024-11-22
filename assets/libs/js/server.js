@@ -16,7 +16,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const SRV_PORT = process.env.PORT || 3000;
-const PRXY_PORT = process.env.PORT || 3030;
 // Add a basic test route
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is running!' });
@@ -64,30 +63,32 @@ app.get('/api/vulnerabilities/latest', async (req, res) => {
     }
 });
 // Proxy scan endpoint
-// app.post('/proxy-scan', async (req, res) => {
-//     try {
-//         const response = await fetch('http://127.0.0.1:7070/scan', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify(req.body)
-//         });
+app.post('/proxy-scan', async (req, res) => {
+    try {
+        const response = await fetch('http://127.0.0.1:7070/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(req.body)
+        });
 
-//         const data = await response.json();
-//         res.json(data);
-//     } catch (error) {
-//         console.error('Proxy error:', error);
-//         res.status(500).json({ error: 'Proxy server error' });
-//     }
-// });
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Proxy error:', error);
+        res.status(500).json({ error: 'Proxy server error' });
+    }
+});
 
 
 // Modified server startup
 app.listen(SRV_PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${SRV_PORT}`);
-    // console.log(`Proxy server running at http://localhost:${PRXY_PORT}`);
-    console.log(`Test the server at: http://localhost:${SRV_PORT}/test`);
-    console.log(`API endpoint at: http://localhost:${SRV_PORT}/api/vulnerabilities/latest`);
+    console.log('\n=== Server Status ===');
+    console.log(`Main server running on port ${SRV_PORT}`);
+    console.log(`Proxy endpoint available at: http://localhost:${SRV_PORT}/proxy-scan`);
+    console.log('\n=== Available Endpoints ===');
+    console.log(`Test endpoint: http://localhost:${SRV_PORT}/test`);
+    console.log(`API endpoint: http://localhost:${SRV_PORT}/api/vulnerabilities/latest`);
 });
 

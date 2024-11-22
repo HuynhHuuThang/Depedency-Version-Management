@@ -8,7 +8,7 @@ async function fetchVulnerabilities() {
         const data = await response.json();
         
         if (data.length > 0) {
-            const tbody = document.getElementById('vulnerabilitiesBody');
+            const tbody = document.getElementById('vulnerabilitiesDashboard');
             tbody.innerHTML = '';
             
             data.forEach((vuln, index) => {
