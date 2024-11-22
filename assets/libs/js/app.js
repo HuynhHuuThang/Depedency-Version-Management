@@ -1,5 +1,6 @@
 // app.js
 
+
 export async function scan(path) {
     console.log('Scanning path:', path);
     try {
@@ -21,7 +22,8 @@ export async function scan(path) {
         console.log('Scan results:', data);
         const processedData = processVulnerabilityData(data);
         console.log('Processed data:', processedData);
-        return data;
+        await saveToScanResult(data, processedData);
+        return processedData;
     } catch (error) {
         console.error('Error during scan:', error);
         alert('Error during scan. Please check the console for details.');
@@ -29,6 +31,30 @@ export async function scan(path) {
     }
 }
 
+async function saveToScanResult(data, processedData) {
+            // Save processed data to the BE
+            try {
+                const saveResponse = await fetch('http://localhost:3000/save-final-data-dev', {
+                    method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    finalData: processedData,
+                    scanData: data,
+                }),
+            });
+    
+            if (!saveResponse.ok) {
+                throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
+        }
+        
+        console.log('Data successfully saved to the database.');
+    } catch (error) {
+        console.error('Error saving data to the database:', error);
+        throw error;
+    }
+}
 async function processVulnerabilityData(data) {
     // Array to store processed vulnerability records
     const vulnerabilityRecords = [];

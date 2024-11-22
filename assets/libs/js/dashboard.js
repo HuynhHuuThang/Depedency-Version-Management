@@ -18,7 +18,7 @@ async function fetchVulnerabilities() {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
-                    <td>${vuln.id}</td>
+                    <td>${vuln.cve_id}</td>
                     <td>${vuln.package_url}</td>
                     <td>${vuln.affected_version}</td>
                     <td>

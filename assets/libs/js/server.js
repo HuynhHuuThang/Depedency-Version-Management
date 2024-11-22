@@ -14,7 +14,8 @@ const app = express();
 
 // Add CORS and JSON middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const SRV_PORT = process.env.PORT || 3000;
 // Add a basic test route
 app.get('/test', (req, res) => {
@@ -35,11 +36,13 @@ pool.connect()
     .then(() => console.log('Successfully connected to PostgreSQL'))
     .catch(err => console.error('Database connection error:', err));
 
+
+
 // Your existing endpoint
 app.get('/api/vulnerabilities/latest', async (req, res) => {
     try {
         const query = `
-            SELECT * FROM vulnerabilities_test
+            SELECT * FROM dev
             ORDER BY 
                 scan_date DESC,
                 CASE 
@@ -80,6 +83,138 @@ app.post('/proxy-scan', async (req, res) => {
         res.status(500).json({ error: 'Proxy server error' });
     }
 });
+
+// Backend API endpoint to save final data to scan_result table
+app.post('/save-final-data', async (req, res) => {
+    const { finalData } = req.body.finalData;
+    console.log(finalData);
+    if (!finalData || !Array.isArray(finalData)) {
+        return res.status(400).json({ error: 'Invalid data format. "finalData" must be an array.' });
+    }
+
+    try {
+        await insertScanHistoryData(finalData);
+        res.status(200).json({ message: 'Scan data saved successfully!' });
+    } catch (error) {
+        console.error('Error saving scan data:', error);
+        res.status(500).json({ error: 'Failed to save scan data.' });
+    }
+});
+// Backend API endpoint to save final data to dev table
+app.post('/save-final-data-dev', async (req, res) => {
+    const { finalData } = req.body.finalData;
+    console.log(finalData);
+    if (!finalData || !Array.isArray(finalData)) {
+        return res.status(400).json({ error: 'Invalid data format. "finalData" must be an array.' });
+    }
+
+    try {
+        await insertVulnerabilityData(finalData);
+        res.status(200).json({ message: 'Scan data saved successfully!' });
+    } catch (error) {
+        console.error('Error saving scan data:', error);
+        res.status(500).json({ error: 'Failed to save scan data.' });
+    }
+});
+
+
+////////////////////////////////////////////////////////////
+async function getScanId() {
+    const query = 'SELECT MAX(scan_id) FROM vulnerabilities';
+    const result = await pool.query(query);
+    return result.rows[0].max || 0;
+}
+async function insertScanResultData(records) {
+    try {
+        await pool.query('BEGIN');
+        let scanId = await getScanId();
+        console.log("Scan ID:", scanId);
+        scanId++;
+        for (const record of records) {
+            const query = `
+                INSERT INTO scan_history (
+                id, 
+                scan_id,
+                purl,
+                version,
+                severity,
+                cvss_score, 
+                fix_version, 
+                recommendation,
+                insights
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ON CONFLICT (id) DO NOTHING;
+            `;
+            const values = [
+                record.vulnerability_id,
+                scanId,
+                record.package,
+                record.score,
+                record.severity,
+                record.recommendation,
+                record.affected_package,
+                record.affected_versions,
+                record.unaffected_versions,
+                record.insights
+            ];
+
+            await pool.query(query, values);
+        }
+
+        await pool.query('COMMIT');
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        console.error('Error inserting vulnerability data:', error);
+        throw error;
+    } finally {
+        await pool.end();
+    }
+}
+
+async function insertVulnerabilityData(records) {
+
+    try {
+        await pool.query('BEGIN');
+        for (const record of records) {
+            const query = `
+                INSERT INTO dev (
+                cve_id, 
+                package_url,
+                affected_version,
+                severity,
+                cvss_score, 
+                fix_version, 
+                recommendation,
+                insights
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                ON CONFLICT (id) DO NOTHING;
+            `;
+            const values = [
+                record.vulnerability_id,
+                record.package,
+                record.affected_versions,
+                record.severity,
+                record.score,
+                record.unaffected_versions,
+                record.recommendation,
+                record.insights
+            ];
+
+            await pool.query(query, values);
+        }
+
+        await pool.query('COMMIT');
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        console.error('Error inserting vulnerability data:', error);
+        throw error;
+    } finally {
+        await pool.end();
+    }
+}
+
 
 
 // Modified server startup

@@ -61,7 +61,7 @@ async function scanDependencies() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                path: directoryPath,
+                path: "E:/Semester6/IndividualProject/Project/source/test",
                 type: "nodejs",
                 profile: "generic"
             }),
@@ -138,10 +138,10 @@ async function processVulnerabilityData(data) {
                 package: package_url || '',
                 score: rating.score || null,
                 severity: rating.severity || null,
-                description: (vuln.description || '')
-                    .replace(/\\n/g, ' ')
-                    .replace(/\\/g, '')
-                    .trim(),
+                // description: (vuln.description || '')
+                //     .replace(/\\n/g, ' ')
+                //     .replace(/\\/g, '')
+                //     .trim(),
                 recommendation: vuln.recommendation || '',
                 affected_package: affect.ref || '',
                 // affected_versions: versions.map(v => ({
@@ -161,36 +161,40 @@ async function processVulnerabilityData(data) {
     }
     
     // Example PostgreSQL insertion (you'll need to modify based on your DB schema)
-    try {
-        for (const record of vulnerabilityRecords) {
-            await db.query(`
-                INSERT INTO vulnerabilities (
-                    vulnerability_id,
-                    score,
-                    severity,
-                    description,
-                    recommendation,
-                    affected_package,
-                    affected_versions,
-                    insights
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            `, [
-                record.vulnerability_id,
-                record.score,
-                record.severity,
-                record.description,
-                record.recommendation,
-                record.affected_package,
-                JSON.stringify(record.affected_versions), // Store versions as JSON
-                record.insights
-            ]);
-        }
-        console.log(`Successfully processed ${vulnerabilityRecords.length} vulnerabilities`);
-    } catch (error) {
-        console.error('Error inserting vulnerability records:', error);
-        throw error;
-    }
+    // try {
+    //     for (const record of vulnerabilityRecords) {
+    //         await db.query(`
+    //            INSERT INTO dev (
+    //             cve_id, 
+    //             package_url,
+    //             affected_version,
+    //             severity,
+    //             cvss_score, 
+    //             fix_version, 
+    //             recommendation,
+    //             insights
+    //             )
+    //             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    //             ON CONFLICT (id) DO NOTHING;
+    //         `, [
+    //             record.vulnerability_id,
+    //             record.package,
+    //             record.score,
+    //             record.severity,
+    //             record.recommendation,
+    //             record.affected_package,
+    //             record.affected_versions,
+    //             record.unaffected_versions,
+    //             record.insights
+    //         ]);
+    //     }
+    //     console.log(`Successfully processed ${vulnerabilityRecords.length} vulnerabilities`);
+    // } catch (error) {
+    //     console.error('Error inserting vulnerability records:', error);
+    //     throw error;
+    // }
     console.log(`Processed ${vulnerabilityRecords.length} vulnerability records`);
+    console.log(vulnerabilityRecords);
     return vulnerabilityRecords;
 }
 
@@ -232,7 +236,7 @@ async function processVulnerabilityData(data) {
     const db = new Client({
         user: 'postgres',
         host: 'localhost',
-        database: 'postgres',
+        database: 'dev',
         password: 'Admin@123456',
         port: 5432,
       });
@@ -242,29 +246,28 @@ async function processVulnerabilityData(data) {
       await db.connect();
       for (const record of vulnerabilityRecords) {
         await db.query(`
-          INSERT INTO vulnerabilities (
-          id, 
-          purl,
-          version,
-          severity,
-          cvss_score, 
-          fix_version, 
-          short_description,
-          recommendation,
-          insights
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
-        `, [
-            record.vulnerability_id,
-            record.package,
-            record.affected_versions,
-            record.severity,
-            record.score,
-            record.unaffected_versions,
-            record.description,
-            record.recommendation,
-            record.insights
-        ]);
+            INSERT INTO dev (
+             cve_id, 
+             package_url,
+             affected_version,
+             severity,
+             cvss_score, 
+             fix_version, 
+             recommendation,
+             insights
+             )
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             ON CONFLICT (id) DO NOTHING;
+         `, [
+             record.vulnerability_id,
+             record.package,
+             record.affected_versions,
+             record.severity,
+             record.score,
+             record.unaffected_versions,
+             record.recommendation,
+             record.insights
+         ]);
       }
   
       console.log("Data insertion complete!");
