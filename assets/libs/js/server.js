@@ -53,7 +53,7 @@ app.get('/api/vulnerabilities/latest', async (req, res) => {
                     ELSE 5
                 END,
                 cvss_score DESC
-            LIMIT 5;
+            LIMIT 10;
         `;
         const result = await pool.query(query);
         res.json(result.rows);
@@ -65,6 +65,20 @@ app.get('/api/vulnerabilities/latest', async (req, res) => {
         });
     }
 });
+// Scan result endpoint
+app.get('/api/vulnerabilities/scan-result', async (req, res) => {
+    try {
+        const query = `
+        select * from scan_result where scan_id=(select max(scan_id) from scan_result);
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Proxy scan endpoint
 app.post('/proxy-scan', async (req, res) => {
     try {

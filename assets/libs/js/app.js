@@ -20,7 +20,7 @@ export async function scan(path) {
         }
         const data = await response.json();
         console.log('Scan results:', data);
-        await saveToScanResult(data);
+        // await saveToScanResult(data);
         // await saveToDev(data);
         return data;
     } catch (error) {
