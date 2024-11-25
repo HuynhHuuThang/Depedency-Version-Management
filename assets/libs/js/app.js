@@ -21,6 +21,7 @@ export async function scan(path) {
         const data = await response.json();
         console.log('Scan results:', data);
         await saveToScanResult(data);
+        // await saveToDev(data);
         return data;
     } catch (error) {
         console.error('Error during scan:', error);
@@ -32,6 +33,29 @@ export async function scan(path) {
 async function saveToScanResult(data) {
     try {
         // Process the data first
+        const saveResponse = await fetch('http://localhost:3000/save-final-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({  // Now using the processed data
+                scanData: data,
+            }),
+        });
+        if (!saveResponse.ok) {
+            throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
+        }
+        console.log('Data successfully saved to the database.');
+    } catch (error) {
+        console.error('Error saving data to the database:', error);
+        throw error;
+    }
+}
+
+
+async function saveToDev(data) {
+    try {
+        // Process the data first
         const saveResponse = await fetch('http://localhost:3000/save-final-data-dev', {
             method: 'POST',
             headers: {
@@ -41,15 +65,12 @@ async function saveToScanResult(data) {
                 scanData: data,
             }),
         });
-
         if (!saveResponse.ok) {
             throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
         }
-        
         console.log('Data successfully saved to the database.');
     } catch (error) {
         console.error('Error saving data to the database:', error);
         throw error;
     }
 }
-

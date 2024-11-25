@@ -86,15 +86,15 @@ app.post('/proxy-scan', async (req, res) => {
 
 // Backend API endpoint to save final data to scan_result table
 app.post('/save-final-data', async (req, res) => {
-    const { scanData } = req.body.scanData;
-    console.log(scanData);
-    // if (!finalData || !Array.isArray(scanData)) {
-    //     return res.status(400).json({ error: 'Invalid data format. "scanData" must be an array.' });
-    // }
+    const scanData = req.body.scanData;
+    if (!scanData) {
+        return res.status(400).json({ error: 'No scan data found.' });
+    }
 
     try {
-        const finalData = processVulnerabilityData(scanData);
-        await insertScanHistoryData(finalData);
+        const finalData = await processVulnerabilityData(scanData);
+        await insertScanResultData(finalData);
+        console.log("done inserting data scan result");
         res.status(200).json({ message: 'Scan data saved successfully!' });
     } catch (error) {
         console.error('Error saving scan data:', error);
@@ -109,11 +109,8 @@ app.post('/save-final-data-dev', async (req, res) => {
     }
     try {
         const finalData = await processVulnerabilityData(scanData);
-        // console.log("done processing data");
-        // console.log("finalData:", finalData);
-        // console.log("Number of records:", finalData.length);
-        // console.log("First record sample:", finalData[0]);
         await insertVulnerabilityData(finalData);
+        console.log("done inserting data dev");
         res.status(200).json({ message: 'Scan data saved successfully!' });
     } catch (error) {
         console.error('Error saving scan data:', error);
@@ -124,23 +121,32 @@ app.post('/save-final-data-dev', async (req, res) => {
 
 ////////////////////////////////////////////////////////////
 async function getScanId() {
-    const query = 'SELECT MAX(scan_id) FROM vulnerabilities';
+    const query = 'SELECT MAX(scan_id) FROM scan_result';
     const result = await pool.query(query);
-    return result.rows[0].max || 0;
+    if (result.rows.length === 0) {
+        return 0;
+    }
+    return result.rows[0].max;
 }
 async function insertScanResultData(records) {
     try {
-        await pool.query('BEGIN');
         let scanId = await getScanId();
         console.log("Scan ID:", scanId);
-        scanId++;
+        if (scanId === null) {
+            scanId = 0;
+            console.log("Scan ID is null, setting to 0");
+        } else {
+            console.log("Scan ID is not null, incrementing by 1");
+            scanId++;
+        }
         for (const record of records) {
+            console.log("scan id record:", scanId);
             const query = `
-                INSERT INTO scan_history (
-                id, 
+                INSERT INTO scan_result (
+                cve_id, 
                 scan_id,
-                purl,
-                version,
+                package_url,
+                affected_version,
                 severity,
                 cvss_score, 
                 fix_version, 
@@ -148,32 +154,27 @@ async function insertScanResultData(records) {
                 insights
                 )
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                ON CONFLICT (id) DO NOTHING;
             `;
             const values = [
                 record.vulnerability_id,
                 scanId,
                 record.package,
-                record.score,
-                record.severity,
-                record.recommendation,
-                record.affected_package,
                 record.affected_versions,
+                record.severity,
+                record.score,
                 record.unaffected_versions,
+                record.recommendation,
                 record.insights
             ];
 
-            await pool.query(query, values);
+            console.log("Executing query with values:", values);  // Log values being inserted
+            await pool.query(query, values); 
         }
 
-        await pool.query('COMMIT');
-    } catch (error) {
-        await pool.query('ROLLBACK');
-        console.error('Error inserting vulnerability data:', error);
-        throw error;
-    } finally {
-        await pool.end();
-    }
+        console.log("Data insertion complete!");
+    } catch (err) {
+      console.error("Error inserting data", err);
+    } 
 }
 
 async function insertVulnerabilityData(records) {
@@ -185,7 +186,6 @@ async function insertVulnerabilityData(records) {
     console.log("records:", records);
     try {
         for (const record of records) {
-            console.log("record:", record);
             const query = `
                 INSERT INTO dev (
                 cve_id, 
@@ -198,7 +198,7 @@ async function insertVulnerabilityData(records) {
                 insights
                 )
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                ON CONFLICT (id) DO NOTHING;
+                ON CONFLICT (cve_id) DO NOTHING;
             `;
             const values = [
                 record.vulnerability_id,
@@ -217,10 +217,7 @@ async function insertVulnerabilityData(records) {
         console.log("Data insertion complete!");
     } catch (err) {
       console.error("Error inserting data", err);
-    } finally {
-      // Close the connection
-      await db.end();
-    }
+    } 
 }
 //// process data
 async function processVulnerabilityData(data) {
@@ -307,4 +304,5 @@ app.listen(SRV_PORT, '0.0.0.0', () => {
     console.log(`Test endpoint: http://localhost:${SRV_PORT}/test`);
     console.log(`API endpoint: http://localhost:${SRV_PORT}/api/vulnerabilities/latest`);
 });
+
 
