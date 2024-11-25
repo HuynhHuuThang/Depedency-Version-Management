@@ -130,9 +130,17 @@ async function processVulnerabilityData(data) {
             const insightsProp = properties.find(p => p?.name === 'depscan:insights');
             const insights = insightsProp?.value || '';
             // define affected and unaffected versions
-            const affectedVersions = versions.filter(v => v?.status === 'affected').map(v => v?.version || '');
-            const unaffectedVersions = versions.filter(v => v?.status === 'unaffected').map(v => v?.version || '');
-            
+            const affectedVersions = versions
+                .filter(v => v?.status === 'affected')
+                .map(v => v?.version?.replace(/['"]+/g, '') || '')
+                .join(', '); // Convert array to comma-separated string
+
+            const unaffectedVersions = versions
+                .filter(v => v?.status === 'unaffected')
+                .map(v => v?.version?.replace(/['"]+/g, '') || '')
+                .join(', '); // Convert array to comma-separated string
+            console.log("Affected Versions:", affectedVersions);
+            console.log("Unaffected Versions:", unaffectedVersions);
             const record = {
                 vulnerability_id: vulnId || '',
                 package: package_url || '',
@@ -284,6 +292,7 @@ async function main() {
     const data = await scanDependencies();
     // console.log('Scan results:', JSON.stringify(data, null, 2));
     const vulnerabilityRecords = await  processVulnerabilityData(data);
+    console.log("Vulnerability Records:", vulnerabilityRecords);
     // console.log("Vulnerability Records:", vulnerabilityRecords);
     await insertData(vulnerabilityRecords);
 }

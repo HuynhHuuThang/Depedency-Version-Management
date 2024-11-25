@@ -86,13 +86,14 @@ app.post('/proxy-scan', async (req, res) => {
 
 // Backend API endpoint to save final data to scan_result table
 app.post('/save-final-data', async (req, res) => {
-    const { finalData } = req.body.finalData;
-    console.log(finalData);
-    if (!finalData || !Array.isArray(finalData)) {
-        return res.status(400).json({ error: 'Invalid data format. "finalData" must be an array.' });
-    }
+    const { scanData } = req.body.scanData;
+    console.log(scanData);
+    // if (!finalData || !Array.isArray(scanData)) {
+    //     return res.status(400).json({ error: 'Invalid data format. "scanData" must be an array.' });
+    // }
 
     try {
+        const finalData = processVulnerabilityData(scanData);
         await insertScanHistoryData(finalData);
         res.status(200).json({ message: 'Scan data saved successfully!' });
     } catch (error) {
@@ -102,13 +103,16 @@ app.post('/save-final-data', async (req, res) => {
 });
 // Backend API endpoint to save final data to dev table
 app.post('/save-final-data-dev', async (req, res) => {
-    const { finalData } = req.body.finalData;
-    console.log(finalData);
-    if (!finalData || !Array.isArray(finalData)) {
-        return res.status(400).json({ error: 'Invalid data format. "finalData" must be an array.' });
+    const scanData = req.body.scanData;
+    if (!scanData) {
+        return res.status(400).json({ error: 'No scan data found.' });
     }
-
     try {
+        const finalData = await processVulnerabilityData(scanData);
+        // console.log("done processing data");
+        // console.log("finalData:", finalData);
+        // console.log("Number of records:", finalData.length);
+        // console.log("First record sample:", finalData[0]);
         await insertVulnerabilityData(finalData);
         res.status(200).json({ message: 'Scan data saved successfully!' });
     } catch (error) {
@@ -174,9 +178,14 @@ async function insertScanResultData(records) {
 
 async function insertVulnerabilityData(records) {
 
+    // console.log("Inserting data into dev table");
+    // console.log("Number of records:", records.length);
+    // console.log("First record sample:", records[0]);
+    // console.log("inserting data into dev table");
+    console.log("records:", records);
     try {
-        await pool.query('BEGIN');
         for (const record of records) {
+            console.log("record:", record);
             const query = `
                 INSERT INTO dev (
                 cve_id, 
@@ -205,17 +214,89 @@ async function insertVulnerabilityData(records) {
             await pool.query(query, values);
         }
 
-        await pool.query('COMMIT');
-    } catch (error) {
-        await pool.query('ROLLBACK');
-        console.error('Error inserting vulnerability data:', error);
-        throw error;
+        console.log("Data insertion complete!");
+    } catch (err) {
+      console.error("Error inserting data", err);
     } finally {
-        await pool.end();
+      // Close the connection
+      await db.end();
     }
 }
+//// process data
+async function processVulnerabilityData(data) {
+    // Array to store processed vulnerability records
+    const vulnerabilityRecords = [];
+    // console.log("Received data:", data);
+    // Check if data and vulnerabilities exist
+    if (!data || !data.vulnerabilities) {
+        console.log("No vulnerability data found");
+        return vulnerabilityRecords;
+    }
+    
+    for (const vuln of data.vulnerabilities) {
+        try {
+            // Get the vulnerability ID
+            // console.log("Vulnerability:", vuln);
+            const vulnId = Array.isArray(vuln.id) ? vuln.id[0] : vuln.id;
+            // console.log("Processing vulnerability:", vulnId);
 
+            const bomRef = Array.isArray(vuln["bom-ref"]) ? vuln["bom-ref"][0] : vuln["bom-ref"];
+            const package_url = bomRef.split('/').slice(1).join('/') || '';
+            
 
+            // Get rating information with safe access
+            const ratings = Array.isArray(vuln.ratings) ? vuln.ratings : vuln.ratings;
+            const rating = ratings[0] || {};
+            // console.log("Rating:", rating);
+            
+            // Get affected version info with safe access
+            const affects = Array.isArray(vuln.affects) ? vuln.affects : [];
+            const affect = affects[0] || {};
+            const versions = affect.versions || [];
+            
+            // Find insights with safe access
+            const properties = Array.isArray(vuln.properties) ? vuln.properties : [];
+            const insightsProp = properties.find(p => p?.name === 'depscan:insights');
+            const insights = insightsProp?.value || '';
+            // define affected and unaffected versions
+            const affectedVersions = versions
+                .filter(v => v?.status === 'affected')
+                .map(v => v?.version?.replace(/['"]+/g, '') || '')
+                .join(', '); // Convert array to comma-separated string
+
+            const unaffectedVersions = versions
+                .filter(v => v?.status === 'unaffected')
+                .map(v => v?.version?.replace(/['"]+/g, '') || '')
+                .join(', '); // Convert array to comma-separated string
+            
+            const record = {
+                vulnerability_id: vulnId || '',
+                package: package_url || '',
+                score: rating.score || null,
+                severity: rating.severity || null,
+                // description: (vuln.description || '')
+                //     .replace(/\\n/g, ' ')
+                //     .replace(/\\/g, '')
+                //     .trim(),
+                recommendation: vuln.recommendation || '',
+                affected_package: affect.ref || '',
+                // affected_versions: versions.map(v => ({
+                //     version: v?.version || '',
+                //     status: v?.status || ''
+                // })),
+                affected_versions: affectedVersions,
+                unaffected_versions: unaffectedVersions,
+                insights: insights
+            };
+            
+            vulnerabilityRecords.push(record);
+        } catch (error) {
+            console.error('Error processing vulnerability:', error);
+            continue; // Skip this vulnerability and continue with the next one
+        }
+    }
+    return vulnerabilityRecords;
+}
 
 // Modified server startup
 app.listen(SRV_PORT, '0.0.0.0', () => {
