@@ -20,6 +20,7 @@ export async function scan(path) {
         }
         const data = await response.json();
         console.log('Scan results:', data);
+        // Save to scan result table and dev table
         // await saveToScanResult(data);
         // await saveToDev(data);
         return data;
