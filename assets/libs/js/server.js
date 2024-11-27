@@ -6,6 +6,9 @@ import pkg from 'pg';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import axios from "axios";
+import {writeFileSync} from "fs";
+import https from 'https';
 
 dotenv.config();
 
@@ -65,6 +68,21 @@ app.get('/api/vulnerabilities/latest', async (req, res) => {
         });
     }
 });
+
+app.get('/api/vulnerabilities/total', async (req, res) => {
+    try {
+        const query = `SELECT COUNT(*) FROM dev;`;
+        const result = await pool.query(query);
+        res.json({ total: parseInt(result.rows[0].count) });
+        // res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message 
+        });
+    }
+});
 // Scan result endpoint
 app.get('/api/vulnerabilities/scan-result', async (req, res) => {
     try {
@@ -78,7 +96,56 @@ app.get('/api/vulnerabilities/scan-result', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+//// dependency scan endpoint
+app.get('/api/dependency-scan', async (req, res) => {
+    try {
+        const query = `select * from dependency_scan where scan_id=(select max(scan_id) from dependency_scan);`;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    }
+    catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
+//save to dependency_scan table
+app.post('/save-dependency-scan', async (req, res) => {
+    const scanData = req.body.scanData;
+    let dependencyRecords = [];
+    let insights = "";
+    try {
+        const dataRecords = await retrieveDependencyNameAndVersion(scanData);
+        for (const item of dataRecords) {
+            const packageName = item.package;
+            const packageVersion = item.version;
+            const latestVersion = await getNpmPackageLatestVersion(packageName).catch(() => 'N/A');
+            const latestPublishDate = await getNpmPackageLatestPublishDate(packageName).catch(() => 'N/A');
+            const weeklyDownloads = await downloadsCountPerVersion(packageName, packageVersion).catch(() => 0);
+            const isMaintained = await isPackageBeingMaintained(packageName).catch(() => false);
+            if (isMaintained === true) {
+                insights = "Maintained";
+            } else {
+                insights = "Unmaintained";
+            }
+            const record = {
+                package: packageName,
+                version: packageVersion,
+                latestVersion: latestVersion || 'N/A',
+                latestPublishDate: latestPublishDate || 'N/A',
+                weeklyDownloads: weeklyDownloads || 0,
+                insights: insights
+            }
+            dependencyRecords.push(record);
+        }
+        // console.log("record ", dependencyRecords);
+        await insertDependencyScanData(dependencyRecords);
+        res.status(200).json({ message: 'Dependency scan data saved successfully!' });
+    } catch (error) {
+        console.error('Error saving scan data:', error);
+        res.status(500).json({ error: 'Failed to save scan data.' });
+    }
+});
 // Proxy scan endpoint
 app.post('/proxy-scan', async (req, res) => {
     try {
@@ -134,8 +201,8 @@ app.post('/save-final-data-dev', async (req, res) => {
 
 
 ////////////////////////////////////////////////////////////
-async function getScanId() {
-    const query = 'SELECT MAX(scan_id) FROM scan_result';
+async function getScanId(tableName) {
+    const query = `SELECT MAX(scan_id) FROM ${tableName}`;
     const result = await pool.query(query);
     if (result.rows.length === 0) {
         return 0;
@@ -144,7 +211,8 @@ async function getScanId() {
 }
 async function insertScanResultData(records) {
     try {
-        let scanId = await getScanId();
+        const tableName = "scan_result";
+        let scanId = await getScanId(tableName);
         console.log("Scan ID:", scanId);
         if (scanId === null) {
             scanId = 0;
@@ -233,6 +301,54 @@ async function insertVulnerabilityData(records) {
       console.error("Error inserting data", err);
     } 
 }
+
+//// insert data to dependency_scan table
+async function insertDependencyScanData(records) {
+    try {
+        const tableName = "dependency_scan";
+        let scanId = await getScanId(tableName);
+        console.log("Scan ID:", scanId);
+        if (scanId === null) {
+            scanId = 0;
+            console.log("Scan ID is null, setting to 0");
+        } else {
+            console.log("Scan ID is not null, incrementing by 1");
+            scanId++;
+        }
+        for (const record of records) {
+            console.log("scan id record:", scanId);
+            const query = `
+                INSERT INTO dependency_scan ( 
+                scan_id,
+                package_name,
+                current_version,
+                latest_version, 
+                latest_publish_date,
+                weekly_downloads,
+                insights
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `;
+            const values = [
+                scanId,
+                record.package,
+                record.version,
+                record.latestVersion,
+                record.latestPublishDate,
+                record.weeklyDownloads,
+                record.insights
+            ];
+
+            console.log("Executing query with values:", values);  // Log values being inserted
+            await pool.query(query, values); 
+        }
+
+        console.log("Data insertion complete!");
+    } catch (err) {
+      console.error("Error inserting data", err);
+    } 
+}
+
 //// process data
 async function processVulnerabilityData(data) {
     // Array to store processed vulnerability records
@@ -308,7 +424,86 @@ async function processVulnerabilityData(data) {
     }
     return vulnerabilityRecords;
 }
+///// get weekly downloads count per version
+async function downloadsCountPerVersion(packageName, packageVersion) {
+    try {
+        const response = await axios.get(
+            `https://api.npmjs.org/versions/${packageName}/last-week`,
+            {
+                httpsAgent: new https.Agent({ rejectUnauthorized: false })
+            }
+        );
+        return response.data.downloads[packageVersion];
+    } catch (error) {
+        console.error('Error fetching download counts:', error.message);
+        return 0;
+    }
+}
+///// get latest version and latest publish date
+async function getNpmPackageLatestVersion(packageName) {
+    try {
+        const response = await axios.get(`https://registry.npmjs.org/${packageName}`);
+        const data = response.data;
+        const latestVersion = data['dist-tags'].latest;
+        // console.log(`Latest Version: ${latestVersion}`);
+        return latestVersion;
+    } catch (error) {
+        console.error('Error fetching package latest version info:', error.message);
+    }
+}
+//// get latest publish date
+async function getNpmPackageLatestPublishDate(packageName) {
+    try {
+        const response = await axios.get(`https://registry.npmjs.org/${packageName}`);
+        const data = response.data;
+        const latestVersion = data['dist-tags'].latest;
+        const publishDate = data.time[latestVersion];
+        // console.log(`Latest Published: ${new Date(publishDate).toLocaleDateString()}`);
+        return publishDate;
+    } catch (error) {
+        console.error('Error fetching package latest publish date info:', error.message);
+    }
+}
+/// Modify the data for dependency scan
+async function retrieveDependencyNameAndVersion(data) {
+    // Array to store processed dependency records
+    const dependencyRecords = [];
+    
+    // Check if data exist
+    if (!data || !data.dependencies) {
+        console.log("No dependency data found");
+        return dependencyRecords;
+    }
+    
+    for (const dep of data.dependencies) {
+        try {
+            const ref = dep.ref;
+            const packageWithVersion = ref.split('/').pop();
+            // const test = packageWithVersion.split('@');
+            const packageName = packageWithVersion.split('@')[0];
+            const packageVersion = packageWithVersion.split('@')[1];
+            const record = {
+                package: packageName,
+                version: packageVersion
+            }
+            dependencyRecords.push(record);
+        } catch (error) {
+            console.error('Error processing dependency:', error);
+            continue; // Skip this vulnerability and continue with the next one
+        }
+    }
+    return dependencyRecords;
+}
 
+/// Check if the package is being maintained
+async function isPackageBeingMaintained(packageName) {
+    const latestPublishDate = await getNpmPackageLatestPublishDate(packageName);
+    const now = new Date();
+    const latestPublishDateObj = new Date(latestPublishDate);
+    const diffTime = Math.abs(now - latestPublishDateObj);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    return diffDays <= 180;
+}
 // Modified server startup
 app.listen(SRV_PORT, '0.0.0.0', () => {
     console.log('\n=== Server Status ===');

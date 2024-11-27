@@ -1,6 +1,5 @@
 // app.js
 
-
 export async function scan(path) {
     console.log('Scanning path:', path);
     try {
@@ -20,9 +19,6 @@ export async function scan(path) {
         }
         const data = await response.json();
         console.log('Scan results:', data);
-        // Save to scan result table and dev table
-        // await saveToScanResult(data);
-        // await saveToDev(data);
         return data;
     } catch (error) {
         console.error('Error during scan:', error);
@@ -31,7 +27,7 @@ export async function scan(path) {
     }
 }
 
-async function saveToScanResult(data) {
+export async function saveToScanResult(data) {
     try {
         // Process the data first
         const saveResponse = await fetch('http://localhost:3000/save-final-data', {
@@ -46,15 +42,15 @@ async function saveToScanResult(data) {
         if (!saveResponse.ok) {
             throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
         }
-        console.log('Data successfully saved to the database.');
+        console.log('Data successfully saved to the scan_result database.');
     } catch (error) {
-        console.error('Error saving data to the database:', error);
+        console.error('Error saving data to the scan_result database:', error);
         throw error;
     }
 }
 
 
-async function saveToDev(data) {
+export async function saveToDev(data) {
     try {
         // Process the data first
         const saveResponse = await fetch('http://localhost:3000/save-final-data-dev', {
@@ -69,9 +65,32 @@ async function saveToDev(data) {
         if (!saveResponse.ok) {
             throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
         }
-        console.log('Data successfully saved to the database.');
+        console.log('Data successfully saved to the dev database.');
     } catch (error) {
-        console.error('Error saving data to the database:', error);
+        console.error('Error saving data to the dev database:', error);
+        throw error;
+    }
+}
+
+
+export async function saveToDependencyScan(data) {
+    try {
+        const saveResponse = await fetch('http://localhost:3000/save-dependency-scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                scanData: data,
+            }), 
+        });
+        if (!saveResponse.ok) {
+            throw new Error(`HTTP error while saving! status: ${saveResponse.status}`);
+        }
+        console.log('Data successfully saved to the dependency_scan database.');
+        return saveResponse;
+    } catch (error) {
+        console.error('Error saving data to the dependency_scan database:', error);
         throw error;
     }
 }

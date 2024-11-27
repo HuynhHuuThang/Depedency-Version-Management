@@ -32,6 +32,19 @@ CREATE TABLE IF NOT EXISTS scan_result (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
+
+CREATE TABLE IF NOT EXISTS dependency_scan (
+    id SERIAL PRIMARY KEY,
+    scan_id VARCHAR,
+    package_name VARCHAR,
+    current_version VARCHAR,
+    latest_version VARCHAR,
+    latest_publish_date VARCHAR,
+    weekly_downloads VARCHAR,
+    insights TEXT,
+    scan_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -56,3 +69,4 @@ CREATE TRIGGER update_scan_result
 
 CREATE INDEX idx_scan_date_scan_result ON scan_result(scan_date);
 CREATE INDEX idx_severity_scan_result ON scan_result(severity);
+CREATE INDEX idx_scan_date_dependency_scan ON dependency_scan(scan_date);

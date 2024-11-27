@@ -1,7 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+    fetchTotalVulnerabilities();
     fetchVulnerabilities();
 });
-
+async function fetchTotalVulnerabilities() {
+    try {
+        const response = await fetch('http://localhost:3000/api/vulnerabilities/total');
+        const data = await response.json();
+        const totalVulnerabilities = document.getElementById('totalVulnerabilities');
+        totalVulnerabilities.innerHTML = `<h1 class="mb-1">${data.total}</h1>`;
+    } catch (error) {
+        console.error('Error fetching total vulnerabilities:', error);
+        const totalVulnerabilities = document.getElementById('totalVulnerabilities');
+        totalVulnerabilities.innerHTML = 'Error';
+    }
+}
+async function fetchTotalUnmanagedPackage() {
+}
 async function fetchVulnerabilities() {
     try {
         const response = await fetch('http://localhost:3000/api/vulnerabilities/latest');
