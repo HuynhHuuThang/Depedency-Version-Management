@@ -96,6 +96,18 @@ app.get('/api/vulnerabilities/scan-result', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+/// Get Total Critical Vulnerability that was scanned
+app.get('/api/vulnerabilities/critical', async (req, res) => {
+    try {
+        const query = `select count(*) from dev where severity="critical";`;
+        const result = await pool.query(query);
+        res.json({ total: parseInt(result.rows[0].count) })
+    } catch (error) {
+        console.log('Database Error: ', error);
+        res.status(500).json({ error: 'Internal server error '});
+    }
+});
+
 //// dependency scan endpoint
 app.get('/api/dependency-scan', async (req, res) => {
     try {
@@ -108,7 +120,28 @@ app.get('/api/dependency-scan', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+app.get('/api/dependency-scan/unmanaged/total', async (req,res) => {
+    try {
+        const query = `select count(*) from dependency_scan where insights="unmanaged";`;
+        const result = await pool.query(query);
+        res.json({ total: parseInt(result.rows[0].count) });
+    }
+    catch (error){
+        console.error('Database Error: ', error);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+});
+/// get total managed package was scanned
+app.get('/api/dependency-scan/managed/total', async (req,res) => {
+    try {
+        const query = `select count(*) from dependency_scan where insight="managed";`;
+        const result = pool.query(query);
+        res.json({ total: parseInt(result.rows[0].count) });
+    } catch (error) {
+        console.error('Database Error: ', error);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+});
 //save to dependency_scan table
 app.post('/save-dependency-scan', async (req, res) => {
     const scanData = req.body.scanData;

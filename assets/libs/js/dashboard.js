@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     fetchTotalVulnerabilities();
     fetchVulnerabilities();
+    fetchTotalUnmanagedPackage();
+    fetchCriticalVulnerability();
+    fetchTotalManagedPackage();
 });
 async function fetchTotalVulnerabilities() {
     try {
@@ -14,7 +17,41 @@ async function fetchTotalVulnerabilities() {
         totalVulnerabilities.innerHTML = 'Error';
     }
 }
+async function fetchCriticalVulnerability() {
+    try{
+        const response = await fetch('http://localhost:3000/api/vulnerabilities/critical');
+        const data = await response.json;
+        const totalCritical = document.getElementById('totalCritical');
+        totalCritical.innerHTML=`<h1 class="mb-1">${data.total}</h1>`;
+    } catch (error) {
+        console.error('Error fetching total Critical Vunerabilities: ', error);
+        const totalCritical = document.getElementById('totalCritical');
+        totalCritical.innerHTML = 'Error';
+    }
+}
 async function fetchTotalUnmanagedPackage() {
+    try {
+        const response = await fetch('http://localhost:3000/api/dependency-scan/unmanaged/total');
+        const data = await response.json();
+        const totalUnmanaged = document.getElementById('totalUnmanaged');
+        totalUnmanaged.innerHTML = `<h1 class="mb-1">${data.total}</h1>`;
+    } catch (error) {
+        console.error('Error fetching total unmanaged packages:', error);
+        const totalUnmanaged = document.getElementById('totalUnmanaged');
+        totalUnmanaged.innerHTML = 'Error';
+    }
+}
+async function fetchTotalManagedPackage(){
+    try {
+        const response = await fetch('http://localhost:3000/api/dependency-scan/managed/total');
+        const data = await response.json();
+        const totalManaged = document.getElementById('totalManaged');
+        totalManaged.innerHTML = `<h1 class="mb-1">${data.total}</h1>`;
+    } catch (error) {
+        console.error('Error fetching total managed packages:', error);
+        const totalManaged = document.getElementById('totalManaged');
+        totalManaged.innerHTML = 'Error';
+    }
 }
 async function fetchVulnerabilities() {
     try {
