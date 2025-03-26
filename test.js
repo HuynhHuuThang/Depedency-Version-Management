@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('http://localhost:3030/proxy-scan', {
+            const response = await fetch('http://localhost:3000/proxy-scan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     profile: "generic"
                 })
             });
-
+            
             const data = await response.json();
             console.log('Scan results:', data);
         } catch (error) {

@@ -1,13 +1,14 @@
-# Concept Bootstrap 4 Admin Dashboard Template
-**Concept** is a responsive Bootstrap 4 admin template. It provides you with a collection of ready to use code snippets and utilities, custom pages, loads of charts, 4 different dashboard variations, a collection of applications and some useful widgets. Preview of this awesome admin template available here: https://colorlib.com/polygon/concept/index.html
+# Dependency Management System
+
+**Dashboard template:** https://colorlib.com/polygon/concept/index.html
 
 # Preview
 
 ### Screenshot
 
-![Concept admin dashboard template preview](https://colorlib.com/wp/wp-content/uploads/sites/2/concept-free-admin-dashboard-panel.jpg)
+![Dependency Management Dashboard](./assets/images/main_dashboard.png)
+![Dependency Scanning Page](./assets/images/scanning_page.png)
 
-### Demo Site: [[Here]](https://colorlib.com/polygon/concept/index.html)
 
 ### TOC
 - [Built With](#built-with)
@@ -49,6 +50,7 @@
 Initial Release
 ### Authors
 [Colorlib](https://colorlib.com)
+[Thang Huu Huynh](https://github.com/HuynhHuuThang)
 
 ### More info
 - [Bootstrap dashboards](https://colorlib.com/wp/free-bootstrap-admin-dashboard-templates/)
