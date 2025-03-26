@@ -56,7 +56,7 @@ async function getNpmPackageInfo(packageName) {
         console.log(`Package: ${packageName}`);
         console.log(`Latest Version: ${latestVersion}`);
         console.log(`Latest Published: ${new Date(publishDate).toLocaleDateString()}`);
-        return data;
+        return publishDate;
     } catch (error) {
         console.error('Error fetching package info:', error.message);
     }
@@ -93,7 +93,7 @@ async function downloadsCount(packageName, fromDate, untilDate) {
     }
 }
 
-async function downloadsCountPerVersion(packageName) {
+async function downloadsCountPerVersion(packageName, version) {
     try {
         const response = await axios.get(
             `https://api.npmjs.org/versions/${packageName}/last-week`,
@@ -101,19 +101,34 @@ async function downloadsCountPerVersion(packageName) {
                 httpsAgent: new https.Agent({ rejectUnauthorized: false })
             }
         );
-        return response.data.downloads;
+        console.log(response.data.downloads[version]);
+        return response.data.downloads[version];
     } catch (error) {
         console.error('Error fetching download counts:', error.message);
         return 0;
     }
 }
+async function isPackageBeingMaintained(packageName) {
+    const latestPublishDate = await getNpmPackageInfo(packageName);
+    const now = new Date();
+    const latestPublishDateObj = new Date(latestPublishDate);
+    console.log(latestPublishDateObj);
+    const diffTime = Math.abs(now - latestPublishDateObj);
+    console.log(diffTime);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    console.log(diffDays);
+    return diffDays <= 180;
+}
+
 
 const fromDate = "2024-11-20";
 const unitDate = "2024-11-20";
 const data = await getNpmPackageInfo('lodash',fromDate,unitDate);
 const downloads = await downloadsCount('lodash', fromDate, unitDate);
 console.log(downloads);
-const downloadsPerVersion = await downloadsCountPerVersion('lodash');
+const downloadsPerVersion = await downloadsCountPerVersion('lodash', '4.0.0');
 console.log(downloadsPerVersion);
+const isMaintained = await isPackageBeingMaintained('lodash');
+console.log(isMaintained);
 writeFileSync('result.json', JSON.stringify(data,null,2));
 console.log("save to file");

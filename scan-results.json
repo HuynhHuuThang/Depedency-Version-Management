@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:bb2a9d00-d841-4013-afde-0347dc131f24",
+  "serialNumber": "urn:uuid:7b76c9df-8e65-4c02-ab4b-c7ad1d9c9307",
   "version": 1,
   "metadata": {
-    "timestamp": "2024-11-18T15:10:34Z",
+    "timestamp": "2024-11-27T00:24:29Z",
     "tools": {
       "components": [
         {
@@ -11492,11 +11492,11 @@
         },
         {
           "name": "affectedVersionRange",
-          "value": "cross-spawn@<7.0.5"
+          "value": "cross-spawn@>=7.0.0-<7.0.5"
         }
       ],
       "published": "2024-11-08T06:30:47",
-      "updated": "2024-11-15T22:25:54"
+      "updated": "2024-11-19T16:19:50"
     },
     {
       "bom-ref": "MAL-2022-1443/pkg:npm/babimelpluginlodash@0.0.1-security.7",

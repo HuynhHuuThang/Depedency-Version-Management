@@ -4,6 +4,9 @@
   "description": "Dependency And Vulnerabilites Management ",
   "main": "test.js",
   "type": "module",
+  "imports": {
+    "pg": "./node_modules/pg/lib/index.js"
+  },
   "directories": {
     "test": "test"
   },

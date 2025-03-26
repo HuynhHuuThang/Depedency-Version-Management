@@ -7,11 +7,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
-    <link href="assets/vendor/fonts/circular-std/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/libs/css/style.css">
-    <link rel="stylesheet" href="assets/libs/css/style.scss">
-    <link rel="stylesheet" href="assets/vendor/fonts/fontawesome/css/fontawesome-all.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link href="../assets/vendor/fonts/circular-std/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/libs/css/style.css">
+    <link rel="stylesheet" href="../assets/vendor/fonts/fontawesome/css/fontawesome-all.css">
+    <link rel="stylesheet" type="text/css" href="../assets/vendor/datatables/css/dataTables.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="../assets/vendor/datatables/css/buttons.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="../assets/vendor/datatables/css/select.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="../assets/vendor/datatables/css/fixedHeader.bootstrap4.css">
     <title>Dependency Version And Vulnerability Management</title>
 </head>
 
@@ -166,9 +169,9 @@
                                                     <li class="nav-item">
                                                         <a class="nav-link" href="dependency-vulnerability-scan.html">Dependency Vulnerability Scan</a>
                                                     </li>
-                                                    <li class="nav-item">
+                                                    <!-- <li class="nav-item">
                                                         <a class="nav-link" href="dependency-tree.html">Dependency Tree</a>
-                                                    </li>
+                                                    </li> -->
                                                 </ul>
                                             </div>
                                         </li>
@@ -201,7 +204,7 @@
                                     <nav aria-label="breadcrumb">
                                         <ol class="breadcrumb">
                                             <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Dependency Monitor</a></li>
-                                            <li class="breadcrumb-item active" aria-current="page">Dependency Vulnerability Scan</li>
+                                            <li class="breadcrumb-item active" aria-current="page">Dependency Scan</li>
                                         </ol>
                                     </nav>
                                 </div>
@@ -210,6 +213,29 @@
                     </div>
                     <!-- ============================================================== -->
                     <!-- end pageheader  -->
+                    <!-- ============================================================== -->
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                            <div class="page-header">
+                                <h2 class="pageheader-title">Data Tables</h2>
+                                <p class="pageheader-text">Proin placerat ante duiullam scelerisque a velit ac porta, fusce sit amet vestibulum mi. Morbi lobortis pulvinar quam.</p>
+                                <div class="page-breadcrumb">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Dashboard</a></li>
+                                            <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Tables</a></li>
+                                            <li class="breadcrumb-item active" aria-current="page">Data Tables</li>
+                                        </ol>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ============================================================== -->
+                    <!-- end pageheader -->
+                    <!-- ============================================================== -->
+                     <!-- ============================================================== -->
+                    <!-- begin scan results  -->
                     <!-- ============================================================== -->
                     <div class="row">
                         <div class="offset-xl-2 col-xl-8 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -221,288 +247,108 @@
                                         <div class="text-center mb-3">
                                             <p>Click the button below to start scanning your local codebase for potential security vulnerabilities in dependencies</p>
                                         </div>
-                                        <div class="text-center">
-                                            <input type="button" class="btn btn-primary" value="Scan Locally">
-                                        </div>
                                         <input class="c-checkbox" type="checkbox" id="checkbox">
+                                        <!-- <button class="c-form__button" type="button" id="scanBtn" onclick="scanDependencies()">Scan</button> -->
                                         <div class="c-formContainer">
-                                        <form class="c-form" action="">
-                                            <input class="c-form__input" placeholder="E-mail" type="email" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$" required>
-                                            <label class="c-form__buttonLabel" for="checkbox">
-                                            <button class="c-form__button" type="button">Send</button>
-                                            </label>
-                                            <label class="c-form__toggle" for="checkbox" data-title="Notify me"></label>
-                                        </form>
+                                            <form class="c-form" id="directoryForm">
+                                                <input class="c-form__input" placeholder="DirectoryPath" type="text" id="directoryPath" >
+                                                <label class="c-form__buttonLabel" for="checkbox">
+                                                    <button class="c-form__button" type="button" id="submitBtn" >Submit</button>
+                                                </label>
+                                                <label class="c-form__toggle" for="checkbox" data-title="Directory Url"></label>
+                                            </form>
                                         </div>
-                                        <!-- </div> -->
-                                        <!-- <input type="file" id="directoryPicker" webkitdirectory>
-                                        <p id="directoryPath"></p>
-                                        <script>
-                                            const directoryPicker = document.getElementById('directoryPicker');
-                                            const directoryPath = document.getElementById('directoryPath');
-                                    
-                                            directoryPicker.addEventListener('change', function () {
-                                                // Extract the directory path from the first selected file's path
-                                                if (directoryPicker.files.length > 0) {
-                                                    const fullPath = directoryPicker.files[0].webkitRelativePath;
-                                                    const pathOnly = fullPath.substring(0, fullPath.lastIndexOf('/'));
-                                                    directoryPath.textContent = `Selected Directory: ${pathOnly}`;
-                                                } else {
-                                                    directoryPath.textContent = 'No directory selected.';
-                                                }
-                                            });
-                                        </script> -->
-                                        <!-- <script>
-                                            var table = document.createElement('table');
-                                            table.className = 'table table-striped';
-
-                                            var thead = document.createElement('thead');
-                                            var tbody = document.createElement('tbody');
-
-                                            var headerRow = document.createElement('tr');
-                                            var headers = ['id', 'package', 'package url', 'package type', 'version', 'severity', 'cvss_score','short_description'];
-                                            headers.forEach(function(header) {
-                                                var th = document.createElement('th');
-                                                th.textContent = header;
-                                                headerRow.appendChild(th);
-
-                                            thead.appendChild(headerRow);
-
-                                            for (var i = 0; i < 5; i++) {
-                                                var row = document.createElement('tr');
-                                                for (var j = 0; j < 7; j++) {
-                                                    var td = document.createElement('td');
-                                                    td.textContent = 'Row ' + (i + 1) + ' Col ' + (j + 1);
-                                                    row.appendChild(td);
-                                                }
-                                                tbody.appendChild(row);
-                                            }
-
-                                            table.appendChild(thead);
-                                            table.appendChild(tbody);
-                                            document.getElementById('tableContainer').appendChild(table);
-                                            document.getElementById("get_the_file").addEventListener("change", function() {
-                                            var file_to_read = document.getElementById("get_the_file").files[0];
-                                            var fileread = new FileReader();
-                                            fileread.onload = function(e) {
-                                                var content = e.target.result;
-                                                // console.log(content);
-                                                var intern = JSON.parse(content); // Array of Objects.
-                                                console.log(intern); // You can index every object
-                                            };
-                                            fileread.readAsText(file_to_read);
-                                            });
-                                        });
-                                        </script> -->
+                                        <!-- <div class="table-responsive"></div>
+                                            <table class="table">
+                                                <thead class="bg-light">
+                                                    <tr class="border-0">
+                                                        <th class="border-0">#</th>
+                                                        <th class="border-0">ID</th>
+                                                        <th class="border-0">Package URL</th>
+                                                        <th class="border-0">Affected Version</th>
+                                                        <th class="border-0">Severity</th>
+                                                        <th class="border-0">CVSS Score</th>
+                                                        <th class="border-0">Fix Version</th>
+                                                        <th class="border-0">Recommendation</th>
+                                                        <th class="border-0">Insights</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="scanResults">
+                                                    
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="9">
+                                                            <a href="#" class="btn btn-outline-light float-right">View Details</a>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div> -->
+                                        <!-- Add notification elements -->
+                                        <div id="scanStatus" class="scan-status" style="display: none;">
+                                            <div class="spinner"></div>
+                                            <span id="statusText">Scanning in progress...</span>
+                                        </div>
+                                        <div id="scanError" class="scan-error" style="display: none;"></div>
                                     </div>
                                 </div>
-                                <!-- <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 pl-xl-0 pl-lg-0 pl-md-0 border-left m-b-30">
-                                    <div class="product-details">
-                                        <div class="border-bottom pb-3 mb-3">
-                                            <h2 class="mb-3">T-Shirt Product Title</h2>
-                                            <div class="product-rating d-inline-block float-right">
-                                                <i class="fa fa-fw fa-star"></i>
-                                                <i class="fa fa-fw fa-star"></i>
-                                                <i class="fa fa-fw fa-star"></i>
-                                                <i class="fa fa-fw fa-star"></i>
-                                                <i class="fa fa-fw fa-star"></i>
-                                            </div>
-                                            <h3 class="mb-0 text-primary">$49.00</h3>
-                                        </div>
-                                        <div class="product-colors border-bottom">
-                                            <h4>Select Colors</h4>
-                                            <input type="radio" class="radio" id="radio-1" name="group" />
-                                            <label for="radio-1"></label>
-                                            <input type="radio" class="radio" id="radio-2" name="group" />
-                                            <label for="radio-2"></label>
-                                            <input type="radio" class="radio" id="radio-3" name="group" />
-                                            <label for="radio-3"></label>
-                                        </div>
-                                        <div class="product-size border-bottom">
-                                            <h4>Size</h4>
-                                            <div class="btn-group" role="group" aria-label="First group">
-                                                <button type="button" class="btn btn-outline-light">SM</button>
-                                                <button type="button" class="btn btn-outline-light">L</button>
-                                                <button type="button" class="btn btn-outline-light">XL</button>
-                                                <button type="button" class="btn btn-outline-light">XXl</button>
-                                            </div>
-                                            <div class="product-qty">
-                                                <h4>Quantity</h4>
-                                                <div class="quantity">
-                                                    <input type="number" min="1" max="9" step="1" value="1">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="product-description">
-                                            <h4 class="mb-1">Descriptions</h4>
-                                            <p>Praesent et cursus quam. Etiam vulputate est et metus pellentesque iaculis. Suspendisse nec urna augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>
-                                            <a href="#" class="btn btn-primary btn-block btn-lg">Add to Cart</a>
-                                        </div>
-                                    </div>
-                                </div> -->
-                                <!-- <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 m-b-60">
-                                    <div class="simple-card">
-                                        <ul class="nav nav-tabs" id="myTab5" role="tablist">
-                                            <li class="nav-item">
-                                                <a class="nav-link active border-left-0" id="product-tab-1" data-toggle="tab" href="#tab-1" role="tab" aria-controls="product-tab-1" aria-selected="true">Descriptions</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="nav-link" id="product-tab-2" data-toggle="tab" href="#tab-2" role="tab" aria-controls="product-tab-2" aria-selected="false">Reviews</a>
-                                            </li>
-                                        </ul>
-                                        <div class="tab-content" id="myTabContent5">
-                                            <div class="tab-pane fade show active" id="tab-1" role="tabpanel" aria-labelledby="product-tab-1">
-                                                <p>Praesent et cursus quam. Etiam vulputate est et metus pellentesque iaculis. Suspendisse nec urna augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubiliaurae.</p>
-                                                <p>Nam condimentum erat aliquet rutrum fringilla. Suspendisse potenti. Vestibulum placerat elementum sollicitudin. Aliquam consequat molestie tortor, et dignissim quam blandit nec. Donec tincidunt dui libero, ac convallis urna dapibus eu. Praesent volutpat mi eget diam efficitur, a mollis quam ultricies. Morbi eu turpis odio.</p>
-                                                <ul class="list-unstyled arrow">
-                                                    <li>
-                                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-                                                    <li>Donec ut elit sodales, dignissim elit et, sollicitudin nulla.</li>
-                                                    <li>Donec at leo sed nisl vestibulum fermentum.
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <div class="tab-pane fade" id="tab-2" role="tabpanel" aria-labelledby="product-tab-2">
-                                                <div class="review-block">
-                                                    <p class="review-text font-italic m-0">“Vestibulum cursus felis vel arcu convallis, viverra commodo felis bibendum. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Proin non auctor est, sed lacinia velit. Orci varius natoque penatibus et magnis dis parturient montes nascetur ridiculus mus.”</p>
-                                                    <div class="rating-star mb-4">
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                    </div>
-                                                    <span class="text-dark font-weight-bold">Virgina G. Lightfoot</span><small class="text-mute"> (Company name)</small>
-                                                </div>
-                                                <div class="review-block border-top mt-3 pt-3">
-                                                    <p class="review-text font-italic m-0">“Integer pretium laoreet mi ultrices tincidunt. Suspendisse eget risus nec sapien malesuada ullamcorper eu ac sapien. Maecenas nulla orci, varius ac tincidunt non, ornare a sem. Aliquam sed massa volutpat, aliquet nibh sit amet, tincidunt ex. Donec interdum pharetra dignissim.”</p>
-                                                    <div class="rating-star mb-4">
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                    </div>
-                                                    <span class="text-dark font-weight-bold">Ruby B. Matheny</span><small class="text-mute"> (Company name)</small>
-                                                </div>
-                                                <div class="review-block  border-top mt-3 pt-3">
-                                                    <p class="review-text font-italic m-0">“ Cras non rutrum neque. Sed lacinia ex elit, vel viverra nisl faucibus eu. Aenean faucibus neque vestibulum condimentum maximus. In id porttitor nisi. Quisque sit amet commodo arcu, cursus pharetra elit. Nam tincidunt lobortis augueat euismod ante sodales non. ”</p>
-                                                    <div class="rating-star mb-4">
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                        <i class="fa fa-fw fa-star"></i>
-                                                    </div>
-                                                    <span class="text-dark font-weight-bold">Gloria S. Castillo</span><small class="text-mute"> (Company name)</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 m-b-10">
-                                    <h3> Related Products</h3>
-                                </div>
-                                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div class="product-thumbnail">
-                                        <div class="product-img-head">
-                                            <div class="product-img">
-                                                <img src="assets/images/eco-product-img-1.png" alt="" class="img-fluid"></div>
-                                            <div class="ribbons">New</div>
-                                            <div class=""><a href="#" class="product-wishlist-btn"><i class="fas fa-heart"></i></a></div>
-                                        </div>
-                                        <div class="product-content">
-                                            <div class="product-content-head">
-                                                <h3 class="product-title">T-Shirt Product Title</h3>
-                                                <div class="product-rating d-inline-block">
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                </div>
-                                                <div class="product-price">$49.00</div>
-                                            </div>
-                                            <div class="product-btn">
-                                                <a href="#" class="btn btn-primary">Add to Cart</a>
-                                                <a href="#" class="btn btn-outline-light">Details</a>
-                                                <a href="#" class="btn btn-outline-light"><i class="fas fa-exchange-alt"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div class="product-thumbnail">
-                                        <div class="product-img-head">
-                                            <div class="product-img">
-                                                <img src="assets/images/eco-product-img-2.png" alt="" class="img-fluid"></div>
-                                            <div class="ribbons bg-danger">Sold</div>
-                                            <div class=""><a href="#" class="product-wishlist-btn"><i class="fas fa-heart"></i></a></div>
-                                        </div>
-                                        <div class="product-content">
-                                            <div class="product-content-head">
-                                                <h3 class="product-title">T-Shirt Product Title</h3>
-                                                <div class="product-rating d-inline-block">
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                </div>
-                                                <div class="product-price">$49.00</div>
-                                            </div>
-                                            <div class="product-btn">
-                                                <a href="#" class="btn btn-primary">Add to Cart</a>
-                                                <a href="#" class="btn btn-outline-light">Details</a>
-                                                <a href="#" class="btn btn-outline-light"><i class="fas fa-exchange-alt"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
-                                    <div class="product-thumbnail">
-                                        <div class="product-img-head">
-                                            <div class="product-img">
-                                                <img src="assets/images/eco-product-img-3.png" alt="" class="img-fluid"></div>
-                                            <div class="ribbons bg-brand">Offer</div>
-                                            <div class=""><a href="#" class="product-wishlist-btn active"><i class="fas fa-heart"></i></a></div>
-                                        </div>
-                                        <div class="product-content">
-                                            <div class="product-content-head">
-                                                <h3 class="product-title">T-Shirt Product Title</h3>
-                                                <div class="product-rating d-inline-block">
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                    <i class="fa fa-fw fa-star"></i>
-                                                </div>
-                                                <div class="product-price">$49.00
-                                                    <del class="product-del">$69.00</del>
-                                                </div>
-                                            </div>
-                                            <div class="product-btn">
-                                                <a href="#" class="btn btn-primary">Add to Cart</a>
-                                                <a href="#" class="btn btn-outline-light">Details</a>
-                                                <a href="#" class="btn btn-outline-light"><i class="fas fa-exchange-alt"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                 </div>
+                <!-- ============================================================== -->
+                <!-- end scan results  -->
+                <!-- ============================================================== -->
+                    <div class="row">
+                        <!-- ============================================================== -->
+                        <!-- basic table  -->
+                        <!-- ============================================================== -->
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                            <div class="card">
+                                <h5 class="card-header">Dependency Scan Table</h5>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered first">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Name</th>
+                                                    <th>Version</th>
+                                                    <th>Latest Version</th>
+                                                    <th>Lastest Published</th>
+                                                    <th>Weekly Downloads</th>
+                                                    <th>Insights</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="scanResults">
+                                            
+                                            </tbody>
+                                            <!-- <tfoot>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Position</th>
+                                                    <th>Office</th>
+                                                    <th>Age</th>
+                                                    <th>Start date</th>
+                                                </tr>
+                                            </tfoot> -->
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ============================================================== -->
+                        <!-- end basic table  -->
+                        <!-- ============================================================== -->
+                    </div>
                 <!-- ============================================================== -->
                 <!-- footer -->
                 <!-- ============================================================== -->
                 <div class="footer">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-                                Copyright © 2018 Concept. All rights reserved. Dashboard by <a href="https://colorlib.com/wp/">Colorlib</a>.
+                            <div class="col-xl-6 col-lg-12 col-md-6 col-sm-12 col-12">
+                                Copyright © 2018 Concept. All rights reserved. Dashboard by <a href="https://colorlib.com/wp/">Colorlib</a>. Reconfigured by Thang Huu Huynh.
                             </div>
                             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                                 <div class="text-md-right footer-links d-none d-sm-block">
@@ -517,12 +363,10 @@
                 <!-- ============================================================== -->
                 <!-- end footer -->
                 <!-- ============================================================== -->
-            </div>
             <!-- ============================================================== -->
             <!-- end wrapper  -->
             <!-- ============================================================== -->
         </div>
-
     </div>
         <!-- ============================================================== -->
         <!-- end main wrapper  -->
@@ -534,8 +378,26 @@
         <script src="assets/vendor/bootstrap/js/bootstrap.bundle.js"></script>
         <!-- slimscroll js -->
         <script src="assets/vendor/slimscroll/jquery.slimscroll.js"></script>
-        <!-- main js -->
-        <script src="assets/libs/js/main-js.js"></script>
+        <script src="../assets/vendor/jquery/jquery-3.3.1.min.js"></script>
+        <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.js"></script>
+        <script src="../assets/vendor/slimscroll/jquery.slimscroll.js"></script>
+        <script src="../assets/vendor/multi-select/js/jquery.multi-select.js"></script>
+        <script src="../assets/libs/js/main-js.js"></script>
+        <!-- <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script> -->
+        <script src="../assets/vendor/datatables/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+        <script src="../assets/vendor/datatables/js/buttons.bootstrap4.min.js"></script>
+        <script src="../assets/vendor/datatables/js/data-table.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+        <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.colVis.min.js"></script>
+        <script src="https://cdn.datatables.net/rowgroup/1.0.4/js/dataTables.rowGroup.min.js"></script>
+        <script src="https://cdn.datatables.net/select/1.2.7/js/dataTables.select.min.js"></script>
+        <script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
+        <script type="module" src="assets/libs/js/dependency-scan.js"></script>
         <script>
         jQuery('<div class="quantity-nav"><div class="quantity-button quantity-up">+</div><div class="quantity-button quantity-down">-</div></div>').insertAfter('.quantity input');
         jQuery('.quantity').each(function() {
@@ -570,7 +432,11 @@
 
         });
         </script>
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <div class="loading-text">Scanning dependencies...</div>
+            </div>
+        </div>
 </body>
-
- 
 </html>
